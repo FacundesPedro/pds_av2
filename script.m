@@ -106,7 +106,7 @@ subplot(2,1,2);
 plot(t, x);
 title('Sinal Original');
 
-% Plotagem FIR
+% Plotagem FIR FIltros
 figure;
 freqz(fir_low_filter, 1, 1024, fs);
 title('Filtro Passa-Baixa ( 0-250 hz )');
@@ -118,17 +118,18 @@ title('Filtro Passa-faixa ( 250-2000 hz )');
 figure;
 freqz(fir_high_filter, 1, 1024, fs);
 title('Filtro Passa-Alta ( 2000/20000 hz )');
-
+% Plotagem FIR Sinais filtrados
 figure;
-subplot(2,1,3);
+subplot(2,1,1);
 plot(t, filtered_low_fir);
 title('Sinal Filtrado com FIR/LOW');
 
-subplot(2,1,4);
+subplot(2,1,2);
 plot(t, filtered_medium_fir);
 title('Sinal Filtrado com FIR/MEDIUM');
 
-subplot(2,1,5);
+figure;
+subplot(2,1,1);
 plot(t, filtered_high_fir);
 title('Sinal Filtrado com FIR/HIGH');
 
