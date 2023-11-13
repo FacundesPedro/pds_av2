@@ -10,8 +10,8 @@ fc_high = 2000; % freq inicial de corte para freq altas, hz, !agudos;
 time = 5; % record duration in seconds
 
 % Criando um sinal senoidal de teste!!!!
-t = 0:1/10:time; % Vetor de tempo
-f = 2500; % Frequência do sinal senoidal
+t = 0:1/6000:time; % Vetor de tempo
+f = 150; % Frequência do sinal senoidal
 x = sin(2*pi*f*t);
 noise = randn(1,length(x));
 %y + noise
@@ -62,20 +62,51 @@ stopband_high_normalized = stopband_high_freq / (fs/2);
 % Calculando a ordem do filtro usando a regra de Kaiser
 order_fir_low = kaiserord([passband_low_normalized, stopband_low_normalized], [1, 0], [ripple_max, attenuation]);
 order_fir_medium = kaiserord([passband_medium_normalized, stopband_medium_normalized], [1, 0], [ripple_max, attenuation]);
-order_fir_high = kaiserord([passband_high_normalized, stopband_high_normalized], [1, 0], [ripple_max, attenuation]);
+order_fir_high = kaiserord([passband_high_normalized, stopband_high_normalized], [1, 0] , [ripple_max, attenuation]);
+order_fir_low = 550;
+order_fir_medium = 550;
+order_fir_high = 550;
 % print the orders for comparison!!
 
 % Criando filtros
 fir_low_filter = fir1(order_fir_low, [passband_low_normalized, stopband_low_normalized], kaiser(order_fir_low+1, ripple_max));
 fir_medium_filter = fir1(order_fir_medium, [passband_medium_normalized, stopband_medium_normalized], kaiser(order_fir_medium+1, ripple_max));
-fir_high_filter = fir1(order_fir_high, [passband_high_normalized, stopband_high_normalized], kaiser(order_fir_high+1, ripple_max));
+fir_high_filter = fir1(order_fir_high, [passband_high_normalized, stopband_high_normalized], kaiser(order_fir_high+1,  ripple_max));
+
+% Projeto do filtro IIR passa-baixa
+[b_low, a_low] = butter(6, stopband_low_normalized, 'low');
+
+% Aplicação do filtro IIR passa-baixa no sinal de áudio gravado
+voiceFilteredLowIIR = filter(b_low, a_low, signal);
+
+% Projeto do filtro IIR passa-faixa
+[b_mid, a_mid] = butter(6, [stopband_medium_normalized, stopband_high_normalized], 'bandpass');
+
+% Aplicação do filtro IIR passa-faixa no sinal de áudio gravado
+voiceFilteredMidIIR = filter(b_mid, a_mid, signal);
+
+% Projeto do filtro IIR passa-alta
+[b_high, a_high] = butter(6, stopband_high_normalized, 'high');
+
+% Aplicação do filtro IIR passa-alta no sinal de áudio gravado
+voiceFilteredHighIIR = filter(b_high, a_high, signal);
 
 % Aplicando filtros
 filtered_low_fir = filter(fir_low_filter, 1, signal);
 filtered_medium_fir = filter(fir_medium_filter, 1, signal);
 filtered_high_fir = filter(fir_high_filter, 1, signal);
 
-% Plotagem
+% plotagem sinal de entrada e ruido
+figure;
+subplot(2,1,1);
+plot(t, signal);
+title('Sinal com ruído');
+
+subplot(2,1,2);
+plot(t, x);
+title('Sinal Original');
+
+% Plotagem FIR
 figure;
 freqz(fir_low_filter, 1, 1024, fs);
 title('Filtro Passa-Baixa ( 0-250 hz )');
@@ -89,18 +120,25 @@ freqz(fir_high_filter, 1, 1024, fs);
 title('Filtro Passa-Alta ( 2000/20000 hz )');
 
 figure;
-subplot(2,1,1);
-plot(t, signal);
-title('Sinal Original');
-
-subplot(2,1,2);
+subplot(2,1,3);
 plot(t, filtered_low_fir);
 title('Sinal Filtrado com FIR/LOW');
 
-subplot(2,1,3);
+subplot(2,1,4);
 plot(t, filtered_medium_fir);
 title('Sinal Filtrado com FIR/MEDIUM');
 
-subplot(2,1,4);
+subplot(2,1,5);
 plot(t, filtered_high_fir);
 title('Sinal Filtrado com FIR/HIGH');
+
+% Plotagem dos sinais filtrados IIR
+figure;
+
+subplot(3,1,1);
+plot(t, voiceFilteredLowIIR);
+title('Sinal Filtrado com IIR/Baixo');
+
+subplot(3,1,2);
+plot(t, voiceFilteredMidIIR);
+title('Sinal Filtrado com IIR/Médio-Alto');
