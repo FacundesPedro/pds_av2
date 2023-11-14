@@ -170,6 +170,19 @@ subplot(3,1,3);
 stem(filtered_high_fir);
 title('Sinal Filtrado com FIR/HIGH');
 
+figure;
+subplot(3,1,1);
+stem(abs(fft(filtered_low_fir)));
+title('Sinal Filtrado/LOW (Magnitude)');
+
+subplot(3,1,2);
+stem(abs(fft(filtered_medium_fir)));
+title('Sinal Filtrado/MEDIUM (Magnitude)');
+
+subplot(3,1,3);
+stem(abs(fft(filtered_high_fir)));
+title('Sinal Filtrado/HIGH (Magnitude)');
+
 % Plotagem dos sinais filtrados IIR
 figure;
 subplot(3,1,1);
@@ -178,7 +191,11 @@ title('Sinal Filtrado com IIR/Baixo');
 
 subplot(3,1,2);
 stem(voiceFilteredMidIIR);
-title('Sinal Filtrado com IIR/Médio-Alto');
+title('Sinal Filtrado com IIR/Médio');
+
+subplot(3,1,3);
+stem(voiceFilteredHighIIR);
+title('Sinal Filtrado com IIR/Alto');
 
 % Save the filtered signal to a .wav file
 audiowrite(strcat(filename,"_fir_low.wav"), filtered_low_fir, fs);
